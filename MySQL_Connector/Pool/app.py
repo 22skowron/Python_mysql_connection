@@ -17,8 +17,7 @@ def validate_input(required_properties, data):
 
 @app.post('/insert_customer')
 def insert_customer():
-    logger_main.info('📩 Received a new POST request.')
-    logger_main.info('⏱️ Processing start.')
+    logger_main.info('📩 Received a new POST request: [/insert_customer]')
 
     required_properties = ['first_name', 'last_name', 'email', 'employee_id']
     try:
@@ -37,8 +36,6 @@ def insert_customer():
 
         # Insert a customer to the database
         message, status = insert_customer_mysql(first_name, last_name, email, employee_id)
-
-        logger_main.info('⏱️ Processing end.')
         return {"message": message}, status
 
     except Exception as e:
@@ -50,8 +47,7 @@ def insert_customer():
 
 @app.post('/query_products')
 def query_products():
-    logger_main.info('📩 Received a new POST request.')
-    logger_main.info('⏱️ Processing start.')
+    logger_main.info('📩 Received a new POST request: [/query_products]')
 
     required_properties = ['category']
     try:
@@ -67,8 +63,6 @@ def query_products():
 
         # Query the database for the products of that category
         message, status = get_products_mysql(category)
-
-        logger_main.info('⏱️ Processing end.')
         return {"message": message}, status
 
     except Exception as e:

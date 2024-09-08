@@ -11,6 +11,7 @@ pool = create_connection_pool()
 
 
 def insert_customer_mysql(first_name, last_name, email, employee_id):
+    logger_mysql.info("⚙️ Inserting a new customer...")
     connection, cursor = None, None
     try:
         connection = pool.get_connection()
@@ -52,6 +53,7 @@ def insert_customer_mysql(first_name, last_name, email, employee_id):
 
 
 def get_products_mysql(category):
+    logger_mysql.info("⚙️ Getting products for requested category...")
     connection, cursor = None, None
     try:
         connection = pool.get_connection()
