@@ -15,3 +15,4 @@ def setup_logger(name=None):
 
 
 logger_main = setup_logger('main')
+logger_mysql = setup_logger('mysql')
