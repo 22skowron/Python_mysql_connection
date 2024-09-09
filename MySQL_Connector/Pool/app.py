@@ -15,34 +15,7 @@ def validate_input(required_properties, data):
     return None
 
 
-@app.post('/insert_customer')
-def insert_customer():
-    logger_main.info('📩 Received a new POST request: [/insert_customer]')
 
-    required_properties = ['first_name', 'last_name', 'email', 'employee_id']
-    try:
-        data = request.get_json()
-
-        # Short-circuit if any property is missing
-        validation_error = validate_input(required_properties, data)
-        if validation_error:
-            return {"message": validation_error}, 400
-
-        # Extract data
-        first_name = data['first_name']
-        last_name = data['last_name']
-        email = data['email']
-        employee_id = data['employee_id']
-
-        # Insert a customer to the database
-        message, status = insert_customer_mysql(first_name, last_name, email, employee_id)
-        return {"message": message}, status
-
-    except Exception as e:
-        logger_main.warning(f"❌ An error occurred during processing the request.")
-        logger_main.warning(f"Error message: {e}.")
-        message = "❌ An error occurred during processing the request."
-        return {"message": message}, 400
 
 
 @app.post('/query_products')
