@@ -1,22 +1,10 @@
-from quart import Quart, request, jsonify
-import asyncio
-import logging
-from MySQL_Connector.Pool.db import init_mysql_pool, insert_customer_mysql, close_mysql_pool
+from quart import Quart, request
 from logger import logger_main
+from mysql_db_config import initialize_connection_pool, close_connection_pool, get_pool
+from mysql_db_queries import insert_customer_mysql, get_products_mysql, print_pool_queries
+import asyncio
 
 app = Quart(__name__)
-
-
-# Initialize MySQL pool before the app starts serving requests
-@app.before_serving
-async def before_serving():
-    await init_mysql_pool()
-
-
-# Close MySQL pool after the app shuts down
-@app.after_serving
-async def after_serving():
-    await close_mysql_pool()
 
 
 # Function to validate input
@@ -25,6 +13,25 @@ def validate_input(required_properties, data):
         if prop not in data:
             return f"Missing property: {prop}"
     return None
+
+
+# Example of an additional asynchronous task
+async def some_async_task():
+    logger_main.info("⏱️ Start of the dummy task.")
+    await asyncio.sleep(3)
+    logger_main.info("⏱️ End of the dummy task.")
+
+
+# Initialize MySQL pool before the app starts serving requests
+@app.before_serving
+async def before_serving():
+    await initialize_connection_pool()
+
+
+# Close MySQL pool after the app shuts down
+@app.after_serving
+async def after_serving():
+    await close_connection_pool()
 
 
 # Example asynchronous endpoint for inserting a customer
@@ -39,7 +46,7 @@ async def insert_customer():
         # Short-circuit if any property is missing
         validation_error = validate_input(required_properties, data)
         if validation_error:
-            return jsonify({"message": validation_error}), 400
+            return {"message": validation_error}, 400
 
         # Extract data
         first_name = data['first_name']
@@ -47,23 +54,42 @@ async def insert_customer():
         email = data['email']
         employee_id = data['employee_id']
 
-        # Insert a customer into the database asynchronously
-        message, status = await insert_customer_mysql(first_name, last_name, email, employee_id)
+        # Execute the tasks asynchronously
+        try:
+            async with asyncio.TaskGroup() as tg:
+                task1 = tg.create_task(insert_customer_mysql(first_name, last_name, email, employee_id))
+                task2 = tg.create_task(some_async_task())
 
-        # Asynchronous task for future actions (dummy async task here)
-        await asyncio.create_task(some_async_task())
+            message, status = task1.result()
+            return {"message": message}, status
 
-        return jsonify({"message": message}), status
+        except Exception as e:
+            logger_main.error(f"❌ An error occurred during the execution of asynchronous tasks.")
+            logger_main.error(f"Error message: {e}.")
+            message = "❌ An error occurred during the execution of asynchronous tasks."
+            return {"message": message}, 500
 
     except Exception as e:
-        logger_main.warning(f"❌ An error occurred during processing the request: {e}")
-        return jsonify({"message": "An error occurred during processing the request."}), 400
+        logger_main.error(f"❌ An error occurred during processing the request.")
+        logger_main.error(f"Error message: {e}.")
+        message = "❌ An error occurred during processing the request."
+        return {"message": message}, 400
 
-# Example of an additional asynchronous task
-async def some_async_task():
-    # Simulate async work
-    await asyncio.sleep(2)
-    logger_main.info('Async task completed.')
+
+@app.post('/print_pool')
+async def print_pool():
+    try:
+        # Access the pool using get_pool
+        pool_test = get_pool()
+        print("App Pool Test:", pool_test)
+
+        # Call the function in mysql_db_queries.py, which also uses get_pool
+        await print_pool_queries()
+
+        return { "message": "Done"}, 200
+    except Exception as e:
+        return { "message": "Error"}, 500
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

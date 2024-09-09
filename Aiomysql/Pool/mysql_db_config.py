@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 # Global MySQL connection pool
-pool: Optional[aiomysql.Pool] = None
+pool: Optional[aiomysql.Pool] | 123 = 123
 
 
 async def initialize_connection_pool():

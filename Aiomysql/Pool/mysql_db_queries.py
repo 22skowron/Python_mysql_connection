@@ -1,15 +1,13 @@
 from logger import logger_mysql, logger_main
 from mysql_db_config import initialize_connection_pool, close_connection_pool, get_pool
-import aiomysql
 import asyncio
-import time
 
 
 async def insert_customer_mysql(first_name, last_name, email, employee_id):
     logger_mysql.info("⚙️ Inserting a new customer...")
     await asyncio.sleep(4)
     try:
-        pool = get_pool()  # Get the current value of `pool` from mysql_db_config.py
+        pool = get_pool()
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
                 query = "INSERT INTO customers (first_name, last_name, email, served_by_employee_id) VALUES (%s, %s, %s, %s)"
@@ -33,7 +31,7 @@ async def insert_customer_mysql(first_name, last_name, email, employee_id):
         return message, 500
 
 
-async def get_products_info(category):
+async def get_products_mysql(category):
     logger_mysql.info("⚙️ Getting products for requested category...")
     await asyncio.sleep(2)
     try:
@@ -70,17 +68,25 @@ async def main_async():
     logger_main.info("⏱️ Start of db interaction.")
     async with asyncio.TaskGroup() as tg:
         task_insert = tg.create_task(insert_customer_mysql('John', 'Doe', 'jdoe@gmail.com', 2))
-        task_query = tg.create_task(get_products_info('furniture'))
+        task_query = tg.create_task(get_products_mysql('furniture'))
+        task_print = tg.create_task(print_pool_queries())
     logger_main.info("⏱️ End of db interaction.")
 
     await close_connection_pool()
 
 
+async def print_pool_queries():
+    # Access the pool using get_pool
+    pool_test = get_pool()
+    print("Queries Pool Test:", pool_test)
+
+
 async def main():
     await initialize_connection_pool()
     await insert_customer_mysql('John', 'Doe', 'jdoe@gmail.com', 2)
-    await get_products_info('furniture')
+    await get_products_mysql('furniture')
     await close_connection_pool()
 
 
-asyncio.run(main_async())
+# asyncio.run(main_async())
+# asyncio.run(print_pool_queries())
