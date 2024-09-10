@@ -5,7 +5,7 @@ import asyncio
 
 async def insert_customer_mysql(first_name, last_name, email, employee_id):
     logger_mysql.info("⚙️ Inserting a new customer...")
-    await asyncio.sleep(4)
+    await asyncio.sleep(7)
     try:
         pool = get_pool()
         async with pool.acquire() as conn:
@@ -33,7 +33,7 @@ async def insert_customer_mysql(first_name, last_name, email, employee_id):
 
 async def get_products_mysql(category):
     logger_mysql.info("⚙️ Getting products for requested category...")
-    await asyncio.sleep(2)
+    await asyncio.sleep(10)
     try:
         pool = get_pool()
         async with pool.acquire() as conn:
@@ -44,14 +44,13 @@ async def get_products_mysql(category):
 
                 rows = await cur.fetchall()
                 if rows:
-                    message = f"We have the following products which belong to {category} category:\n"
+                    message = f"We have the following products which belong to {category} category:"
                     for row in rows:
                         id, product_name, category, price, stock_quantity = row
-                        message += f"\t{product_name}: ${price}\n"
+                        message += f" 💠{product_name}: ${price}"
                 else:
                     message = f"Unfortunately we don't have any products which belong to {category} category in our catalog."
 
-                print('\n', message, '\n')
                 logger_mysql.info("✅ SELECT query executed successfully.")
                 return message, 200
 

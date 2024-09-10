@@ -1,8 +1,10 @@
 from quart import Quart, request
+from quart.utils import run_sync
 from logger import logger_main
 from mysql_db_config import initialize_connection_pool, close_connection_pool, get_pool
 from mysql_db_queries import insert_customer_mysql, get_products_mysql, print_pool_queries
 import asyncio
+import time
 
 app = Quart(__name__)
 
@@ -18,7 +20,7 @@ def validate_input(required_properties, data):
 # Example of an additional asynchronous task
 async def some_async_task():
     logger_main.info("⏱️ Start of the dummy task.")
-    await asyncio.sleep(3)
+    await asyncio.sleep(5)
     logger_main.info("⏱️ End of the dummy task.")
 
 
@@ -61,6 +63,11 @@ async def insert_customer():
                 task2 = tg.create_task(some_async_task())
 
             message, status = task1.result()
+
+            # Dummy CPU-bound task wrapped in run_sync
+            logger_main.info("Sleeping for 10s ...")
+            await run_sync(time.sleep)(10)
+
             return {"message": message}, status
 
         except Exception as e:
@@ -72,6 +79,33 @@ async def insert_customer():
     except Exception as e:
         logger_main.error(f"❌ An error occurred during processing the request.")
         logger_main.error(f"Error message: {e}.")
+        message = "❌ An error occurred during processing the request."
+        return {"message": message}, 400
+
+
+@app.post('/query_products')
+async def query_products():
+    logger_main.info('📩 Received a new POST request: [/query_products]')
+
+    required_properties = ['category']
+    try:
+        data = await request.get_json()
+
+        # Shortcircuit if any property is missing
+        validation_error = validate_input(required_properties, data)
+        if validation_error:
+            return {"message": validation_error}, 400
+
+        # Extract data
+        category = data['category']
+
+        # Query the database for the products of that category
+        message, status = await get_products_mysql(category)
+        return {"message": message}, status
+
+    except Exception as e:
+        logger_main(f"❌ An error occurred during processing the request.")
+        logger_main(f"Error message: {e}.")
         message = "❌ An error occurred during processing the request."
         return {"message": message}, 400
 
@@ -92,4 +126,4 @@ async def print_pool():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

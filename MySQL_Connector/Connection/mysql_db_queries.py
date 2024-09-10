@@ -47,10 +47,10 @@ def get_products_mysql(category):
 
         rows = cursor.fetchall()
         if rows:
-            message = f"We have the following products which belong to {category} category:\n"
+            message = f"We have the following products which belong to {category} category:"
             for row in rows:
                 id, product_name, category, price, stock_quantity = row
-                message += f"\t{product_name}: ${price}\n"
+                message += f" 💠{product_name}: ${price}"
         else:
             message = f"Unfortunately we don't have any products which belong to {category} category in our catalog."
 
