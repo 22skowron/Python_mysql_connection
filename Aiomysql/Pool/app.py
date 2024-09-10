@@ -60,13 +60,13 @@ async def insert_customer():
         try:
             async with asyncio.TaskGroup() as tg:
                 task1 = tg.create_task(insert_customer_mysql(first_name, last_name, email, employee_id))
-                task2 = tg.create_task(some_async_task())
+                # task2 = tg.create_task(some_async_task())
 
             message, status = task1.result()
 
-            # Dummy CPU-bound task wrapped in run_sync
-            logger_main.info("Sleeping for 10s ...")
-            await run_sync(time.sleep)(10)
+            # # Dummy CPU-bound task wrapped in run_sync
+            # logger_main.info("Sleeping for 5 ...")
+            # await run_sync(time.sleep)(5)
 
             return {"message": message}, status
 

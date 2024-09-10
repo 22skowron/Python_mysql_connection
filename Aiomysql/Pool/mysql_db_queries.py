@@ -1,3 +1,5 @@
+import time
+
 from logger import logger_mysql, logger_main
 from mysql_db_config import initialize_connection_pool, close_connection_pool, get_pool
 import asyncio
@@ -5,10 +7,22 @@ import asyncio
 
 async def insert_customer_mysql(first_name, last_name, email, employee_id):
     logger_mysql.info("⚙️ Inserting a new customer...")
-    await asyncio.sleep(7)
+    await asyncio.sleep(5)
     try:
         pool = get_pool()
-        async with pool.acquire() as conn:
+
+        # Use asyncio.wait_for() to set a 3-second timeout for pool.acquire()
+        try:
+            conn = await asyncio.wait_for(pool.acquire(), timeout=3)
+        except asyncio.TimeoutError:
+            logger_mysql.error("❌ Timed out while waiting to acquire a connection from the pool.")
+            message = "❌ Timed out while waiting to acquire a connection from the pool."
+            return message, 500
+
+        async with conn:
+            logger_mysql.info("🥱 Sleeping inside of connection...")
+            await asyncio.sleep(5)
+
             async with conn.cursor() as cur:
                 query = "INSERT INTO customers (first_name, last_name, email, served_by_employee_id) VALUES (%s, %s, %s, %s)"
                 data = (first_name, last_name, email, employee_id)
@@ -61,31 +75,7 @@ async def get_products_mysql(category):
         return message, 500
 
 
-async def main_async():
-    await initialize_connection_pool()
-
-    logger_main.info("⏱️ Start of db interaction.")
-    async with asyncio.TaskGroup() as tg:
-        task_insert = tg.create_task(insert_customer_mysql('John', 'Doe', 'jdoe@gmail.com', 2))
-        task_query = tg.create_task(get_products_mysql('furniture'))
-        task_print = tg.create_task(print_pool_queries())
-    logger_main.info("⏱️ End of db interaction.")
-
-    await close_connection_pool()
-
-
 async def print_pool_queries():
     # Access the pool using get_pool
     pool_test = get_pool()
     print("Queries Pool Test:", pool_test)
-
-
-async def main():
-    await initialize_connection_pool()
-    await insert_customer_mysql('John', 'Doe', 'jdoe@gmail.com', 2)
-    await get_products_mysql('furniture')
-    await close_connection_pool()
-
-
-# asyncio.run(main_async())
-# asyncio.run(print_pool_queries())

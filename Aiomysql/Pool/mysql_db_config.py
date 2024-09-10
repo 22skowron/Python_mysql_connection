@@ -61,9 +61,3 @@ def get_pool():
     global pool
     return pool
 
-
-async def main():
-    global pool
-    await initialize_connection_pool()
-    await close_connection_pool()
-
