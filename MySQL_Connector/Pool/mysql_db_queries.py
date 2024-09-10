@@ -16,6 +16,7 @@ def insert_customer_mysql(first_name, last_name, email, employee_id):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor()
+        time.sleep(3)
 
         query = "INSERT INTO customers (first_name, last_name, email, served_by_employee_id) VALUES (%s, %s, %s, %s)"
         data = (first_name, last_name, email, employee_id)
@@ -58,6 +59,7 @@ def get_products_mysql(category):
     try:
         connection = pool.get_connection()
         cursor = connection.cursor()
+        time.sleep(3)
 
         query = "SELECT * FROM products WHERE category = %s"
         data = (category,)
@@ -65,10 +67,10 @@ def get_products_mysql(category):
 
         rows = cursor.fetchall()
         if rows:
-            message = f"We have the following products which belong to {category} category:\n"
+            message = f"We have the following products which belong to {category} category:"
             for row in rows:
                 id, product_name, category, price, stock_quantity = row
-                message += f"\t{product_name}: ${price}\n"
+                message += f" 💠{product_name}: ${price}"
         else:
             message = f"Unfortunately we don't have any products which belong to {category} category in our catalog."
 
@@ -80,7 +82,6 @@ def get_products_mysql(category):
         #     employee_id=1
         # )
 
-        print('\n', message, '\n')
         logger_mysql.info("✅ SELECT query executed successfully.")
         return message, 200
 

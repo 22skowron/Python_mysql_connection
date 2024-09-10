@@ -27,7 +27,7 @@ async def request_customers(session, customer, index):
         async with session.post(url_customers, json=customer) as response:
             status = response.status
             data = await response.json()
-            logger_requests.info(f"↘️ {index}. R status: {status}, R json: {data}")
+            logger_requests.info(f"↘️↘️ {index}. R status: {status}, R json: {data}")
 
     except Exception as e:
         logger_requests.error(f"❌ {index}. Error sending request for customer {customer['first_name']}.")

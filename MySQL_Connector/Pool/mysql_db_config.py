@@ -13,7 +13,7 @@ def create_connection_pool():
         # Establish the connection
         pool = pooling.MySQLConnectionPool(
             pool_name='mysql_pool',
-            pool_size=3,
+            pool_size=5,
             pool_reset_session=True,
             connection_timeout=15,
             host=os.environ.get('MYSQL_HOST'),

@@ -47,7 +47,7 @@ async def insert_customer_mysql(first_name, last_name, email, employee_id):
 
 async def get_products_mysql(category):
     logger_mysql.info("⚙️ Getting products for requested category...")
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
     try:
         pool = get_pool()
         async with pool.acquire() as conn:
