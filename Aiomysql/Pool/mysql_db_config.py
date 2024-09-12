@@ -15,8 +15,8 @@ async def initialize_connection_pool():
     global pool
     try:
         pool = await aiomysql.create_pool(
-            minsize=3,
-            maxsize=5,
+            minsize=2,
+            maxsize=2,
             connect_timeout=10,
             host=os.environ.get('MYSQL_HOST'),
             user=os.environ.get('MYSQL_USER'),

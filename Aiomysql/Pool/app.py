@@ -40,6 +40,7 @@ async def after_serving():
 @app.post('/insert_customer')
 async def insert_customer():
     logger_main.info('📩 Received a new POST request: [/insert_customer]')
+    await asyncio.sleep(1)
 
     required_properties = ['first_name', 'last_name', 'email', 'employee_id']
     try:
@@ -86,6 +87,7 @@ async def insert_customer():
 @app.post('/query_products')
 async def query_products():
     logger_main.info('📩 Received a new POST request: [/query_products]')
+    await asyncio.sleep(1)
 
     required_properties = ['category']
     try:

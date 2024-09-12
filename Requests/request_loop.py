@@ -38,9 +38,9 @@ async def send_requests():
     async with aiohttp.ClientSession() as session:
         async with asyncio.TaskGroup() as tg:
 
-            for i in range(10):
-                # tg.create_task(request_products(session, dummy_category, i))
-                tg.create_task(request_customers(session, dummy_customer, i))
+            for i in range(6):
+                tg.create_task(request_products(session, dummy_category, i))
+                # tg.create_task(request_customers(session, dummy_customer, i))
 
 
 # Run the asynchronous code
